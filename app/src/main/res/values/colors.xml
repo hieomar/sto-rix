@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="black">#030408</color>
+    <color name="prussian_blue">#182A3A</color>
+    <color name="air_superiority_blue">#5E9FC1</color>
+    <color name="gunmetal">#193241</color>
+    <color name="davys_gray">#575D62</color>
+    <color name="transparent">#00000000</color>
+
+</resources>
