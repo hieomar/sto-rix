@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.storix" />
+                  <option name="mobileSdkAppId" value="1:448628166984:android:6e495c8e730441a6fea37d" />
+                  <option name="projectId" value="sto-rix" />
+                  <option name="projectNumber" value="448628166984" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
