@@ -101,7 +101,6 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/text_input_password"
             android:layout_width="match_parent"
@@ -130,7 +129,7 @@
 
 
     <Button
-        android:id="@+id/button_sign_in"
+        android:id="@+id/button_sign_up"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"

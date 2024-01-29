@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="white">#FFFFFFFF</color>
-
+    <color name="white_70">#B3FFFFFF</color>
     <color name="black">#030408</color>
     <color name="prussian_blue">#182A3A</color>
     <color name="air_superiority_blue">#5E9FC1</color>

@@ -39,6 +39,14 @@ public class SignIn extends AppCompatActivity {
         signInBtn= findViewById(R.id.button_sign_in);
         signUpNewUserBtn = findViewById(R.id.button_new_user);
 
+        signInBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SignIn.this, UserProfile.class);
+                startActivity(intent);
+            }
+        });
+
         signUpNewUserBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

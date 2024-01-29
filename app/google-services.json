@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "448628166984",
+    "firebase_url": "https://sto-rix-default-rtdb.firebaseio.com",
     "project_id": "sto-rix",
     "storage_bucket": "sto-rix.appspot.com"
   },

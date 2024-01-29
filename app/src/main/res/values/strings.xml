@@ -60,4 +60,11 @@
     <string name="fullname">Full Name</string>
     <string name="phone">Phone Number</string>
     <string name="already_have_an_account_sign_in">Already Have An account? Sign In</string>
+    <string name="profile_picture">profile picture</string>
+    <string name="user_name">hieomar</string>
+    <string name="user_full_name">omar Chibwana</string>
+    <string name="omar_chibwana">Omar Chibwana</string>
+    <string name="demo_email">imawhoiam@gmail.com</string>
+    <string name="demo_password">fgdfgdhfjgjjhkhk</string>
+    <string name="update_profile">Update Profile</string>
 </resources>

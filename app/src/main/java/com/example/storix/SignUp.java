@@ -1,13 +1,19 @@
 package com.example.storix;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -16,14 +22,19 @@ import java.util.Objects;
 public class SignUp extends AppCompatActivity {
 
     TextInputLayout regFullName, regUserName, regEmail, regPassword;
-    Button registerBtn;
+    Button registerBtn, signInBtn;
 
-    FirebaseDatabase rootNode;
+    FirebaseDatabase database;
     DatabaseReference reference;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        FirebaseApp.initializeApp(this);
+        // Firebase
+        database = FirebaseDatabase.getInstance("https://sto-rix-default-rtdb.firebaseio.com/");
+        reference = database.getReference("Users");
+
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN); // to hide the status bar
         setContentView(R.layout.activity_sign_up);
@@ -33,7 +44,8 @@ public class SignUp extends AppCompatActivity {
         regUserName = findViewById(R.id.text_input_username);
         regEmail= findViewById(R.id.text_input_email);
         regPassword = findViewById(R.id.text_input_password);
-        registerBtn =findViewById(R.id.button_sign_in);
+        registerBtn =findViewById(R.id.button_sign_up);
+        signInBtn = findViewById(R.id.button_new_user);
 
         registerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -41,6 +53,16 @@ public class SignUp extends AppCompatActivity {
                 registerUser(v);
             }
         });
+
+
+        signInBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SignUp.this, SignIn.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private Boolean validateFullName() {
@@ -110,14 +132,14 @@ public class SignUp extends AppCompatActivity {
             regPassword.setErrorEnabled(false);
             return true;
         }
+
     }
+    // Inside the registerUser method
     public void registerUser(View view) {
-        if (!validateFullName() | !validateUserName() | !validateEmail() | !validatePassword()) {
+        Log.d("SignUp", "registerUser method called");
+        if (!validateFullName() || !validateUserName() || !validateEmail() || !validatePassword()) {
             return;
         }
-
-        rootNode = FirebaseDatabase.getInstance();
-        reference = rootNode.getReference("users");
 
         // Get all the values
         String fullName = Objects.requireNonNull(regFullName.getEditText()).getText().toString();
@@ -126,10 +148,9 @@ public class SignUp extends AppCompatActivity {
         String password = Objects.requireNonNull(regPassword.getEditText()).getText().toString();
 
         // Create a UserHelperClass object
-        UserHelperClass helperClass = new UserHelperClass(fullName, userName, email, password);
-        reference.child(userName).setValue(helperClass);
+        UserHelperClass user = new UserHelperClass(fullName, userName, email, password);
 
-
+        String userID = reference.push().getKey();
+        reference.child(Objects.requireNonNull(userID)).setValue(user);
     }
-
 }
