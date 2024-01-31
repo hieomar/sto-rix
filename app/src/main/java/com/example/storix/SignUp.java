@@ -1,6 +1,7 @@
 package com.example.storix;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -151,6 +152,16 @@ public class SignUp extends AppCompatActivity {
         UserHelperClass user = new UserHelperClass(fullName, userName, email, password);
 
         String userID = reference.push().getKey();
-        reference.child(Objects.requireNonNull(userID)).setValue(user);
+        reference.child(Objects.requireNonNull(userID)).setValue(user, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
+                if(error == null){
+                    Toast.makeText(SignUp.this, "Registered Successfully", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(SignUp.this, SignIn.class);
+                }else{
+                    Toast.makeText(SignUp.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 }
