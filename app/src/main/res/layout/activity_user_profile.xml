@@ -1,81 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
+    android:backgroundTint="@color/prussian_blue"
     tools:context=".UserProfile">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+    <RelativeLayout
+        android:id="@+id/relative_layout"
+        android:layout_width="413dp"
+        android:layout_height="239dp"
+        android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        tools:ignore="UselessParent">
 
+        <androidx.cardview.widget.CardView
+            android:id="@+id/profile_picture_card"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerVertical="true"
+            app:cardCornerRadius="50dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:background="@color/prussian_blue"
-            android:gravity="center"
-            android:padding="20dp"
-            tools:ignore="UselessParent">
+            <ImageView
+                android:id="@+id/profile_picture"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/profile_picture"
+                android:src="@drawable/profile_img" />
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/profile_picture_card"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:layout_centerVertical="true"
-                app:cardCornerRadius="50dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+        </androidx.cardview.widget.CardView>
 
-                <ImageView
-                    android:id="@+id/profile_picture"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:contentDescription="@string/profile_picture"
-                    android:src="@drawable/profile_img" />
+        <TextView
+            android:id="@+id/user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="20dp"
+            android:layout_toEndOf="@id/profile_picture_card"
+            android:fontFamily="@font/roboto"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-            </androidx.cardview.widget.CardView>
+        <TextView
+            android:id="@+id/user_full_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/user_name"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@id/profile_picture_card"
+            android:fontFamily="@font/roboto_light"
+            android:paddingStart="20dp"
+            android:textColor="@color/white_70"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:ignore="RtlSymmetry" />
 
+    </RelativeLayout>
 
-            <TextView
-                android:id="@+id/user_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginStart="20dp"
-                android:layout_toEndOf="@id/profile_picture_card"
-                android:fontFamily="@font/roboto"
-                android:text="@string/user_name"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/user_full_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/user_name"
-                android:layout_centerVertical="true"
-                android:layout_toEndOf="@id/profile_picture_card"
-                android:fontFamily="@font/roboto_light"
-                android:paddingStart="20dp"
-                android:text="@string/user_full_name"
-                android:textColor="@color/white_70"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                tools:ignore="RtlSymmetry" />
-
-        </RelativeLayout>
+    <ScrollView
+        android:layout_width="400dp"
+        android:layout_height="401dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:paddingTop="-50dp"
+        app:layout_constraintTop_toBottomOf="@+id/relative_layout">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="-85dp"
             android:background="@drawable/rounded_background"
             android:orientation="vertical"
             android:padding="15dp">
@@ -170,7 +175,20 @@
 
         </LinearLayout>
 
-    </LinearLayout>
+    </ScrollView>
 
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        app:itemIconSize="30dp"
+        app:itemIconTint="@drawable/item_selector"
+        app:itemRippleColor="@color/transparent"
+        app:labelVisibilityMode="unlabeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/bottom_menu" />
 
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>
