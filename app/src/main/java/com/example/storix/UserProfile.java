@@ -46,25 +46,5 @@ public class UserProfile extends AppCompatActivity {
             }
             return false;
         });
-
-        // ShowAllData
-        showAllUserData();
-
-    }
-
-    private void showAllUserData() {
-        Intent intent = getIntent();
-
-        String user_username = intent.getStringExtra("fullName");
-        String user_fullname = intent.getStringExtra("userName");
-        String user_email = intent.getStringExtra("email");
-        String user_password = intent.getStringExtra("password");
-
-        fullNameLabel.setText(user_fullname);
-        userNameLabel.setText(user_username);
-        Objects.requireNonNull(fullName.getEditText()).setText(user_fullname);
-        Objects.requireNonNull(userName.getEditText()).setText(user_username);
-        Objects.requireNonNull(userEmail.getEditText()).setText(user_email);
-        Objects.requireNonNull(password.getEditText()).setText(user_password);
     }
 }

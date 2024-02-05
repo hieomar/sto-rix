@@ -15,7 +15,7 @@
         android:layout_marginTop="216dp"
         android:layout_marginEnd="8dp"
         android:transitionName="logo_img"
-        android:src="@drawable/ic_storix_foreground"
+        android:src="@drawable/storix"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

@@ -124,8 +124,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textColor="@color/white_70"
                 android:text="@string/audios"
+                android:textColor="@color/white_70"
                 android:textSize="25sp" />
 
         </LinearLayout>
@@ -167,7 +167,74 @@
                 android:textSize="25sp" />
 
         </LinearLayout>
+
     </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginBottom="13dp"
+        android:contentDescription="@string/display_fads_for_adding_videos_images_audios_and_documents"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/document_card"
+        app:layout_constraintVertical_bias="0.812"
+        app:srcCompat="@drawable/add_fab" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/video_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:contentDescription="@string/add_videos"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/add_fab"
+        app:layout_constraintEnd_toStartOf="@+id/add_fab"
+        app:layout_constraintTop_toTopOf="@+id/add_fab"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/videos" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/img_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="@string/add_imgs"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/video_fab"
+        app:layout_constraintEnd_toStartOf="@+id/video_fab"
+        app:layout_constraintTop_toTopOf="@+id/video_fab"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/images" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/audio_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="@string/add_audios"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/img_fab"
+        app:layout_constraintEnd_toStartOf="@+id/img_fab"
+        app:layout_constraintTop_toTopOf="@+id/img_fab"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/audios" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/document_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="@string/add_documents"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/audio_fab"
+        app:layout_constraintEnd_toStartOf="@+id/audio_fab"
+        app:layout_constraintTop_toTopOf="@+id/audio_fab"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/documents" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"

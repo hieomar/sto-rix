@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.renderscript.Script;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -14,6 +15,8 @@ import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -26,10 +29,13 @@ public class SignUp extends AppCompatActivity {
     Button registerBtn, signInBtn;
 
     FirebaseDatabase database;
+    FirebaseAuth mAuth;
     DatabaseReference reference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        mAuth = FirebaseAuth.getInstance();
 
         FirebaseApp.initializeApp(this);
         // Firebase
@@ -48,12 +54,7 @@ public class SignUp extends AppCompatActivity {
         registerBtn =findViewById(R.id.button_sign_up);
         signInBtn = findViewById(R.id.button_new_user);
 
-        registerBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                registerUser(v);
-            }
-        });
+        registerBtn.setOnClickListener(this::registerUser);
 
 
         signInBtn.setOnClickListener(new View.OnClickListener() {
@@ -137,31 +138,37 @@ public class SignUp extends AppCompatActivity {
     }
     // Inside the registerUser method
     public void registerUser(View view) {
-        Log.d("SignUp", "registerUser method called");
-        if (!validateFullName() || !validateUserName() || !validateEmail() || !validatePassword()) {
+        if (!validateFullName() | !validateUserName() | !validateEmail() | !validatePassword()) {
             return;
         }
 
-        // Get all the values
-        String fullName = Objects.requireNonNull(regFullName.getEditText()).getText().toString();
-        String userName = Objects.requireNonNull(regUserName.getEditText()).getText().toString();
-        String email = Objects.requireNonNull(regEmail.getEditText()).getText().toString();
-        String password = Objects.requireNonNull(regPassword.getEditText()).getText().toString();
+        SignUpClass signUpClass = new SignUpClass(Objects.requireNonNull(regFullName.getEditText()).getText().toString(),
+                Objects.requireNonNull(regUserName.getEditText()).getText().toString(), Objects.requireNonNull(regEmail.getEditText()).getText().toString(),
+                Objects.requireNonNull(regPassword.getEditText()).getText().toString());
 
-        // Create a UserHelperClass object
-        UserHelperClass user = new UserHelperClass(fullName, userName, email, password);
+        mAuth.createUserWithEmailAndPassword(signUpClass.getEmail(), signUpClass.getPassword()).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
 
-        String userID = reference.push().getKey();
-        reference.child(Objects.requireNonNull(userID)).setValue(user, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(@Nullable DatabaseError error, @NonNull DatabaseReference ref) {
-                if(error == null){
-                    Toast.makeText(SignUp.this, "Registered Successfully", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(SignUp.this, SignIn.class);
-                }else{
-                    Toast.makeText(SignUp.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(SignUp.this, "User created", Toast.LENGTH_SHORT).show();
+
+                FirebaseUser user = mAuth.getCurrentUser();
+                assert user != null;
+                user.sendEmailVerification().addOnCompleteListener(sendEmail -> {
+                    if (sendEmail.isSuccessful()) {
+                        Toast.makeText(SignUp.this, "User created. Please verify your email", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(SignUp.this, "Error: " + Objects.requireNonNull(sendEmail.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                // save all the data in Firebase
+                reference.child(Objects.requireNonNull(mAuth.getCurrentUser()).getUid()).setValue(signUpClass);
+
+                Intent intent = new Intent(SignUp.this, SignIn.class);
+            } else {
+                Toast.makeText(SignUp.this, "Error: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+
     }
 }

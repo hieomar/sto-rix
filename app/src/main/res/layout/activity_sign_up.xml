@@ -12,10 +12,10 @@
     <ImageView
         android:id="@+id/logo"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:layout_gravity="center"
+        android:src="@drawable/storix"
         android:transitionName="logo_img"
-        android:src="@drawable/ic_storix_foreground"
         tools:ignore="ContentDescription" />
 
     <TextView
@@ -49,9 +49,9 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:paddingStart="0dp"
-                android:layout_marginStart="0dp"
-                android:drawableStart="@drawable/ic_profile_foreground"
+                android:paddingStart="5dp"
+                android:drawableStart="@drawable/profile"
+                android:drawablePadding="10dp"
                 android:textColor="@color/white"
                 tools:ignore="RtlSymmetry" />
 
@@ -72,9 +72,9 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:paddingStart="0dp"
-                android:layout_marginStart="0dp"
-                android:drawableStart="@drawable/ic_profile_foreground"
+                android:paddingStart="5dp"
+                android:drawableStart="@drawable/profile"
+                android:drawablePadding="10dp"
                 android:textColor="@color/white"
                 tools:ignore="RtlSymmetry" />
 
@@ -93,9 +93,9 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:paddingStart="0dp"
-                android:layout_marginStart="0dp"
-                android:drawableStart="@drawable/ic_email_foreground"
+                android:paddingStart="5dp"
+                android:drawableStart="@drawable/email"
+                android:drawablePadding="10dp"
                 android:textColor="@color/white"
                 tools:ignore="RtlSymmetry" />
 
@@ -117,9 +117,9 @@
                 android:textColor="@color/white"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:paddingStart="0dp"
-                android:layout_marginStart="0dp"
-                android:drawableStart="@drawable/ic_password_foreground"
+                android:paddingStart="5dp"
+                android:drawableStart="@drawable/password"
+                android:drawablePadding="10dp"
                 android:inputType="textPassword"
                 tools:ignore="RtlSymmetry" />
 

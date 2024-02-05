@@ -28,4 +28,9 @@
     <string name="videos">Videos</string>
     <string name="imgs">Images</string>
     <string name="audios">Audio</string>
+    <string name="display_fads_for_adding_videos_images_audios_and_documents">display fads for adding videos, images, audios and documents</string>
+    <string name="add_videos">upload videos</string>
+    <string name="add_imgs">Upload images</string>
+    <string name="add_audios">Upload Audio</string>
+    <string name="add_documents">Upload Documents</string>
 </resources>

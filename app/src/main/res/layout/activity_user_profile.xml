@@ -96,10 +96,10 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
-                    android:layout_marginStart="0dp"
-                    android:drawableStart="@drawable/ic_profile_foreground"
-                    android:drawablePadding="-30dp"
-                    android:paddingStart="0dp"
+                    android:drawableStart="@drawable/profile"
+                    android:drawableTint="@color/davys_gray"
+                    android:drawablePadding="10dp"
+                    android:paddingStart="5dp"
                     tools:ignore="RtlSymmetry" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -116,10 +116,10 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
-                    android:layout_marginStart="0dp"
-                    android:drawableStart="@drawable/ic_profile_foreground"
-                    android:drawablePadding="-30dp"
-                    android:paddingStart="0dp"
+                    android:drawableStart="@drawable/profile"
+                    android:drawableTint="@color/davys_gray"
+                    android:drawablePadding="10dp"
+                    android:paddingStart="5dp"
                     tools:ignore="RtlSymmetry" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -135,10 +135,10 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
-                    android:layout_marginStart="0dp"
-                    android:drawableStart="@drawable/ic_email_foreground"
-                    android:drawablePadding="-30dp"
-                    android:paddingStart="0dp"
+                    android:drawableStart="@drawable/email"
+                    android:drawableTint="@color/davys_gray"
+                    android:drawablePadding="10dp"
+                    android:paddingStart="5dp"
                     tools:ignore="RtlSymmetry" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -156,10 +156,11 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
                     android:layout_height="60dp"
-                    android:drawableStart="@drawable/ic_password_foreground"
-                    android:drawablePadding="-30dp"
+                    android:drawableStart="@drawable/password"
+                    android:drawableTint="@color/davys_gray"
+                    android:drawablePadding="10dp"
                     android:inputType="textPassword"
-                    android:paddingStart="0dp"
+                    android:paddingStart="5dp"
                     tools:ignore="RtlSymmetry" />
 
             </com.google.android.material.textfield.TextInputLayout>
