@@ -11,7 +11,6 @@ import android.util.Pair;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,26 +29,25 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Queue;
 
 public class SignIn extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
-
+    private DatabaseReference reference;
     ImageView logoImg;
     TextView greetings;
     TextInputLayout userName, password;
     Button forgotPasswordBtn, signInBtn, signUpNewUserBtn;
     LoadDialog loadDialog;
-//    @Override
-//    protected void onStart() {
-//        super.onStart();
-//        FirebaseUser currentUser = mAuth.getCurrentUser();
-//        if (currentUser != null) {
-//            Intent intent = new Intent(getApplicationContext(), LandingMain.class);
-//            startActivity(intent);
-//        }
-//    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            Intent intent = new Intent(getApplicationContext(), LandingMain.class);
+            startActivity(intent);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +57,7 @@ public class SignIn extends AppCompatActivity {
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+        reference = FirebaseDatabase.getInstance().getReference("Users");
 
         logoImg = findViewById(R.id.logo);
         greetings = findViewById(R.id.text_view_greetings);
@@ -68,21 +67,23 @@ public class SignIn extends AppCompatActivity {
         signInBtn = findViewById(R.id.button_sign_in);
         signUpNewUserBtn = findViewById(R.id.button_new_user);
 
+        forgotPasswordBtn.setOnClickListener(view -> forgotPassword());
+
         loadDialog = new LoadDialog(SignIn.this);
 
-      signInBtn.setOnClickListener(this::signInUser);
+        signInBtn.setOnClickListener(this::signInUser);
 
 
         signUpNewUserBtn.setOnClickListener(view -> {
 
             List<Pair<View, String>> pairs = new ArrayList<>();
-            pairs.add(new Pair<View, String>(logoImg, "logo_img"));
-            pairs.add(new Pair<View, String>(greetings, "Sto_rif"));
-            pairs.add(new Pair<View, String>(userName, "Username"));
-            pairs.add(new Pair<View, String>(password, "Password"));
-            pairs.add(new Pair<View, String>(forgotPasswordBtn, "Forgot Password"));
-            pairs.add(new Pair<View, String>(signInBtn, "Sign In"));
-            pairs.add(new Pair<View, String>(signUpNewUserBtn, "New User? Sign Up"));
+            pairs.add(new Pair<>(logoImg, "logo_img"));
+            pairs.add(new Pair<>(greetings, "Sto_rif"));
+            pairs.add(new Pair<>(userName, "Username"));
+            pairs.add(new Pair<>(password, "Password"));
+            pairs.add(new Pair<>(forgotPasswordBtn, "Forgot Password"));
+            pairs.add(new Pair<>(signInBtn, "Sign In"));
+            pairs.add(new Pair<>(signUpNewUserBtn, "New User? Sign Up"));
 
             ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(SignIn.this, pairs.toArray(new Pair[pairs.size()]));
 
@@ -91,9 +92,53 @@ public class SignIn extends AppCompatActivity {
         });
     }
 
+    private void forgotPassword() {
+        if (!validateUserName()) {
+            return;
+        }
+
+        String userEnteredUsername = Objects.requireNonNull(userName.getEditText()).getText().toString().trim();
+
+        Query checkUser = reference.orderByChild("userName").equalTo(userEnteredUsername);
+
+        checkUser.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                        if (Objects.equals(userSnapshot.child("userName").getValue(String.class), userEnteredUsername)) {
+                            String emailFromDB = userSnapshot.child("email").getValue(String.class);
+
+                            // Check if emailFromDB is not null
+                            if (emailFromDB != null) {
+                                // Send password reset email
+                                mAuth.sendPasswordResetEmail(emailFromDB)
+                                        .addOnCompleteListener(task -> {
+                                            if (task.isSuccessful()) {
+                                                Toast.makeText(SignIn.this, "Reset link sent to your email", Toast.LENGTH_SHORT).show();
+                                            } else {
+                                                Toast.makeText(SignIn.this, "Unable to send reset email", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                            } else {
+                                Toast.makeText(SignIn.this, "Error: Email not found", Toast.LENGTH_SHORT).show();
+                            }
+                            return;
+                        }
+                    }
+                    Toast.makeText(SignIn.this, "No such user exist", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle database error
+            }
+        });
+    }
+
     private Boolean validateUserName() {
         String val = Objects.requireNonNull(userName.getEditText()).getText().toString();
-        String noWhiteSpace = "\\A\\w{4,20}\\z";
 
         if (val.isEmpty()) {
             userName.setError("Field cannot be empty");
@@ -122,18 +167,15 @@ public class SignIn extends AppCompatActivity {
     private void signInUser(View view) {
         if (!validateUserName() | !validatePassword()) {
             return;
-        } else {
-            // Start the loading dialog here
-            loadDialog.startLoadingDialog();
-            isUser();
         }
+        // Start the loading dialog here
+        loadDialog.startLoadingDialog();
+        isUser();
     }
 
     private void isUser() {
         String userEnteredUsername = Objects.requireNonNull(userName.getEditText()).getText().toString().trim();
         String userEnteredPassword = Objects.requireNonNull(password.getEditText()).getText().toString().trim();
-
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
 
         reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

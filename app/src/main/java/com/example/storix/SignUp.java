@@ -1,6 +1,7 @@
 package com.example.storix;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -15,8 +16,12 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.Objects;
 
@@ -143,10 +148,36 @@ public class SignUp extends AppCompatActivity {
         } else {
             // Start the loading dialog here
             loadDialog.startLoadingDialog();
-            signUpUser();
+            checkUserName();
         }
     }
 
+    private void checkUserName() {
+        String userEnteredUsername = Objects.requireNonNull(regUserName.getEditText()).getText().toString().trim();
+
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
+        Query checkUser = reference.orderByChild("userName").equalTo(userEnteredUsername);
+
+        checkUser.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Dismiss the loading dialog here
+                    loadDialog.dismissDialog();
+                    Toast.makeText(SignUp.this, "Username already exists", Toast.LENGTH_SHORT).show();
+                } else {
+                    signUpUser();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Handle database error
+                // Dismiss the loading dialog here
+                loadDialog.dismissDialog();
+            }
+        });
+    }
     private void signUpUser() {
         SignUpClass signUpClass = new SignUpClass(Objects.requireNonNull(regFullName.getEditText()).getText().toString(),
                 Objects.requireNonNull(regUserName.getEditText()).getText().toString(), Objects.requireNonNull(regEmail.getEditText()).getText().toString(),
