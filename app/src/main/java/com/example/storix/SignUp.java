@@ -1,13 +1,10 @@
 package com.example.storix;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.renderscript.Script;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -16,8 +13,8 @@ import android.widget.Toast;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -31,6 +28,8 @@ public class SignUp extends AppCompatActivity {
     FirebaseDatabase database;
     FirebaseAuth mAuth;
     DatabaseReference reference;
+
+    LoadDialog loadDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,20 +48,18 @@ public class SignUp extends AppCompatActivity {
         // Hooks
         regFullName = findViewById(R.id.text_input_fullname);
         regUserName = findViewById(R.id.text_input_username);
-        regEmail= findViewById(R.id.text_input_email);
+        regEmail = findViewById(R.id.text_input_email);
         regPassword = findViewById(R.id.text_input_password);
-        registerBtn =findViewById(R.id.button_sign_up);
+        registerBtn = findViewById(R.id.button_sign_up);
         signInBtn = findViewById(R.id.button_new_user);
+
+        loadDialog = new LoadDialog(SignUp.this);
 
         registerBtn.setOnClickListener(this::registerUser);
 
-
-        signInBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(SignUp.this, SignIn.class);
-                startActivity(intent);
-            }
+        signInBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(SignUp.this, SignIn.class);
+            startActivity(intent);
         });
 
     }
@@ -79,7 +76,8 @@ public class SignUp extends AppCompatActivity {
             return true;
         }
     }
-    private  Boolean validateUserName() {
+
+    private Boolean validateUserName() {
         String val = Objects.requireNonNull(regUserName.getEditText()).getText().toString();
         String noWhiteSpace = "\\A\\w{4,20}\\z";
 
@@ -98,6 +96,7 @@ public class SignUp extends AppCompatActivity {
             return true;
         }
     }
+
     private Boolean validateEmail() {
         String val = Objects.requireNonNull(regEmail.getEditText()).getText().toString();
         String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
@@ -114,6 +113,7 @@ public class SignUp extends AppCompatActivity {
             return true;
         }
     }
+
     private Boolean validatePassword() {
         String val = Objects.requireNonNull(regPassword.getEditText()).getText().toString();
         String passwordVal = "^" +
@@ -136,39 +136,53 @@ public class SignUp extends AppCompatActivity {
         }
 
     }
-    // Inside the registerUser method
+
     public void registerUser(View view) {
         if (!validateFullName() | !validateUserName() | !validateEmail() | !validatePassword()) {
             return;
+        } else {
+            // Start the loading dialog here
+            loadDialog.startLoadingDialog();
+            signUpUser();
         }
+    }
 
+    private void signUpUser() {
         SignUpClass signUpClass = new SignUpClass(Objects.requireNonNull(regFullName.getEditText()).getText().toString(),
                 Objects.requireNonNull(regUserName.getEditText()).getText().toString(), Objects.requireNonNull(regEmail.getEditText()).getText().toString(),
                 Objects.requireNonNull(regPassword.getEditText()).getText().toString());
 
         mAuth.createUserWithEmailAndPassword(signUpClass.getEmail(), signUpClass.getPassword()).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-
-                Toast.makeText(SignUp.this, "User created", Toast.LENGTH_SHORT).show();
-
                 FirebaseUser user = mAuth.getCurrentUser();
                 assert user != null;
                 user.sendEmailVerification().addOnCompleteListener(sendEmail -> {
                     if (sendEmail.isSuccessful()) {
-                        Toast.makeText(SignUp.this, "User created. Please verify your email", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignUp.this, "Account created. Please verify your email", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(SignUp.this, "Error: " + Objects.requireNonNull(sendEmail.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                        // Handle the exception here
+                        if (sendEmail.getException() instanceof FirebaseAuthException) {
+                            FirebaseAuthException e = (FirebaseAuthException)sendEmail.getException();
+                            Toast.makeText(SignUp.this, "Failed to send verification email. " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(SignUp.this, "Error: " + Objects.requireNonNull(sendEmail.getException()).getMessage(), Toast.LENGTH_SHORT).show();
+                        }
                     }
                 });
 
                 // save all the data in Firebase
                 reference.child(Objects.requireNonNull(mAuth.getCurrentUser()).getUid()).setValue(signUpClass);
 
+                // Dismiss the loading dialog here
+                loadDialog.dismissDialog();
+
                 Intent intent = new Intent(SignUp.this, SignIn.class);
+                startActivity(intent);
             } else {
+                // Dismiss the loading dialog here
+                loadDialog.dismissDialog();
                 Toast.makeText(SignUp.this, "Error: " + Objects.requireNonNull(task.getException()).getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 }

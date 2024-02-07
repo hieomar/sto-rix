@@ -10,4 +10,10 @@
     <color name="davys_gray">#575D62</color>
     <color name="transparent">#00000000</color>
 
+    <!-- Linear gradient for progress bar -->
+    <color name="progress_start">#5E9FC1</color>
+    <color name="progress_end">#182A3A</color>
+    <color name="progress_middle">#5E9FC1</color>
+    <color name="progress_background">#193241</color>
+
 </resources>

@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -39,6 +40,16 @@ public class SignIn extends AppCompatActivity {
     TextView greetings;
     TextInputLayout userName, password;
     Button forgotPasswordBtn, signInBtn, signUpNewUserBtn;
+    LoadDialog loadDialog;
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//        FirebaseUser currentUser = mAuth.getCurrentUser();
+//        if (currentUser != null) {
+//            Intent intent = new Intent(getApplicationContext(), LandingMain.class);
+//            startActivity(intent);
+//        }
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +68,10 @@ public class SignIn extends AppCompatActivity {
         signInBtn = findViewById(R.id.button_sign_in);
         signUpNewUserBtn = findViewById(R.id.button_new_user);
 
-        signInBtn.setOnClickListener(this::loginUser);
+        loadDialog = new LoadDialog(SignIn.this);
+
+      signInBtn.setOnClickListener(this::signInUser);
+
 
         signUpNewUserBtn.setOnClickListener(view -> {
 
@@ -105,10 +119,12 @@ public class SignIn extends AppCompatActivity {
 
     }
 
-    private void loginUser(View view) {
+    private void signInUser(View view) {
         if (!validateUserName() | !validatePassword()) {
             return;
         } else {
+            // Start the loading dialog here
+            loadDialog.startLoadingDialog();
             isUser();
         }
     }
@@ -130,6 +146,8 @@ public class SignIn extends AppCompatActivity {
                         assert emailFromDB != null;
                         mAuth.signInWithEmailAndPassword(emailFromDB, userEnteredPassword)
                                 .addOnCompleteListener(SignIn.this, task -> {
+                                    // Dismiss the loading dialog here
+                                    loadDialog.dismissDialog();
                                     if (task.isSuccessful()) {
                                         // Sign in success
                                         FirebaseUser user = mAuth.getCurrentUser();
@@ -142,16 +160,24 @@ public class SignIn extends AppCompatActivity {
                                                     Toast.LENGTH_SHORT).show();
                                         }
                                     } else {
-                                        // If sign in fails, log the error.
-                                        Log.w("TAG", "signInWithEmail:failure", task.getException());
-                                        // If sign in fails, display a message to the user.
-                                        Toast.makeText(SignIn.this, "LogIn failed.",
-                                                Toast.LENGTH_SHORT).show();
+                                        // If sign in fails, handle the exception
+                                        if (task.getException() instanceof FirebaseAuthInvalidCredentialsException) {
+                                            Toast.makeText(SignIn.this, "Invalid credentials. Please check your username and password.",
+                                                    Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            // Log the error.
+                                            Log.w("TAG", "signInWithEmail:failure", task.getException());
+                                            // Display a message to the user.
+                                            Toast.makeText(SignIn.this, "LogIn failed.",
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
                                     }
                                 });
                         return;
                     }
                 }
+                // Dismiss the loading dialog here
+                loadDialog.dismissDialog();
                 Toast.makeText(SignIn.this, "No such user exist.",
                         Toast.LENGTH_SHORT).show();
             }
@@ -159,6 +185,9 @@ public class SignIn extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Handle database error
+
+                // Dismiss the loading dialog here
+                loadDialog.dismissDialog();
             }
         });
     }

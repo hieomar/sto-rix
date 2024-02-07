@@ -16,6 +16,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".RegistrationProgress"
+            android:exported="false" />
+        <activity
             android:name=".Image"
             android:exported="false" />
         <activity
