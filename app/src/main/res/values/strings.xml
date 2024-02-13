@@ -34,4 +34,9 @@
     <string name="add_audios">Upload Audio</string>
     <string name="add_documents">Upload Documents</string>
     <string name="loading">Loading…</string>
+    <string name="recent_uploads">Recent Uploads</string>
+    <string name="file_image">File image</string>
+    <string name="file_name">File name</string>
+    <string name="upload_date">Upload Date</string>
+    <string name="file_size">File size</string>
 </resources>

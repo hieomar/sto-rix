@@ -3,12 +3,19 @@ package com.example.storix;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.animation.Animation;
@@ -18,17 +25,17 @@ import android.widget.Toast;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class LandingMain extends AppCompatActivity {
     private StorageReference storageReference;
-    private DatabaseReference databaseReference;
-
     private Uri uri;
     private Animation rotateOpen;
     private Animation rotateClose;
@@ -42,13 +49,14 @@ public class LandingMain extends AppCompatActivity {
     FloatingActionButton documentFab;
 
     private boolean isFabOpen = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_landing_main);
 
         storageReference = FirebaseStorage.getInstance().getReference("uploads");
-        databaseReference = com.google.firebase.database.FirebaseDatabase.getInstance().getReference("uploads");
+        DatabaseReference databaseReference = com.google.firebase.database.FirebaseDatabase.getInstance().getReference("uploads");
 
         rotateOpen = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim);
         rotateClose = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim);
@@ -62,7 +70,7 @@ public class LandingMain extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
         bottomNavigationView.setSelectedItemId(R.id.bottom_home);
 
-//        get material floating action button
+        // Get material floating action button
         fab = findViewById(R.id.add_fab);
         videoFab = findViewById(R.id.video_fab);
         audioFab = findViewById(R.id.audio_fab);
@@ -70,7 +78,7 @@ public class LandingMain extends AppCompatActivity {
         documentFab = findViewById(R.id.document_fab);
 
         fab.setOnClickListener(view -> {
-               onAddButtonClicked();
+            onAddButtonClicked();
         });
 
         videoFab.setOnClickListener(view -> {
@@ -241,10 +249,56 @@ public class LandingMain extends AppCompatActivity {
     }
 
     private void uploadFiles(ArrayList<Uri> uris, String directory) {
+        String userId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
+        int totalFiles = uris.size();
+        AtomicInteger uploadedFiles = new AtomicInteger();
+
+        // Create a notification channel (required for Android 8.0 and above)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("Upload", "File Upload", NotificationManager.IMPORTANCE_LOW);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+            }
+        }
+
+        // Create a notification builder
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "Upload")
+                .setSmallIcon(R.drawable.storix)  // replace with your own icon
+                .setContentTitle("Uploading Files")
+                .setContentText("Upload in progress")
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setProgress(totalFiles, 0, false);
+
+        // Display the notification
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        int notificationId = 1;
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            Log.e("Permission error", "Permission not granted");
+            return;
+        } else {
+            notificationManager.notify(notificationId, builder.build());
+        }
+        notificationManager.notify(notificationId, builder.build());
+
         for (Uri uri : uris) {
-            StorageReference fileReference = storageReference.child(directory).child(Objects.requireNonNull(uri.getLastPathSegment()));
+            StorageReference fileReference = storageReference.child(userId).child(directory).child(Objects.requireNonNull(uri.getLastPathSegment()));
             fileReference.putFile(uri)
-                    .addOnSuccessListener(taskSnapshot -> Toast.makeText(this, "Upload successful", Toast.LENGTH_SHORT).show())
+                    .addOnSuccessListener(taskSnapshot -> {
+                        uploadedFiles.getAndIncrement();
+                        // Update the progress in the notification
+                        builder.setProgress(totalFiles, uploadedFiles.get(), false);
+                        notificationManager.notify(notificationId, builder.build());
+
+                        if (uploadedFiles.get() == totalFiles) {
+                            // When upload is complete, update the notification text and remove the progress bar
+                            builder.setContentText("Upload complete")
+                                    .setProgress(0, 0, false);
+                            notificationManager.notify(notificationId, builder.build());
+                        }
+
+                        Toast.makeText(this, "Upload successful", Toast.LENGTH_SHORT).show();
+                    })
                     .addOnFailureListener(e -> {
                         Toast.makeText(this, "Upload failed", Toast.LENGTH_SHORT).show();
                         Log.e("Upload error", e.getMessage(), e);
