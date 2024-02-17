@@ -7,6 +7,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationChannel;
@@ -14,9 +15,11 @@ import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.animation.Animation;
 import android.webkit.MimeTypeMap;
@@ -26,7 +29,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -36,7 +38,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class LandingMain extends AppCompatActivity {
     private StorageReference storageReference;
-    private Uri uri;
     private Animation rotateOpen;
     private Animation rotateClose;
     private Animation fromRightToLeft;
@@ -56,7 +57,6 @@ public class LandingMain extends AppCompatActivity {
         setContentView(R.layout.activity_landing_main);
 
         storageReference = FirebaseStorage.getInstance().getReference("uploads");
-        DatabaseReference databaseReference = com.google.firebase.database.FirebaseDatabase.getInstance().getReference("uploads");
 
         rotateOpen = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim);
         rotateClose = android.view.animation.AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim);
@@ -77,25 +77,15 @@ public class LandingMain extends AppCompatActivity {
         imageFab = findViewById(R.id.img_fab);
         documentFab = findViewById(R.id.document_fab);
 
-        fab.setOnClickListener(view -> {
-            onAddButtonClicked();
-        });
+        fab.setOnClickListener(view -> onAddButtonClicked());
 
-        videoFab.setOnClickListener(view -> {
-            openVideoSelector();
-        });
+        videoFab.setOnClickListener(view -> openVideoSelector());
 
-        audioFab.setOnClickListener(view -> {
-            openAudioSelector();
-        });
+        audioFab.setOnClickListener(view -> openAudioSelector());
 
-        imageFab.setOnClickListener(view -> {
-            openImageSelector();
-        });
+        imageFab.setOnClickListener(view -> openImageSelector());
 
-        documentFab.setOnClickListener(view -> {
-            openDocumentSelector();
-        });
+        documentFab.setOnClickListener(view -> openDocumentSelector());
 
         VideoCard.setOnClickListener(view -> {
             startActivity(new Intent(getApplicationContext(), Video.class));
@@ -191,7 +181,7 @@ public class LandingMain extends AppCompatActivity {
     private void showSelectedItems(ArrayList<Uri> uris, String fileType) {
         StringBuilder message = new StringBuilder();
         for (Uri uri : uris) {
-            message.append(uri.getLastPathSegment()).append("\n");
+            message.append(getFileName(uri)).append("\n");
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this)
@@ -248,6 +238,31 @@ public class LandingMain extends AppCompatActivity {
         builder.show();
     }
 
+    @SuppressLint("Range")
+    private String getFileName(Uri uri) {
+        String result = null;
+        if (Objects.equals(uri.getScheme(), "content")) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                assert cursor != null;
+                cursor.close();
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            assert result != null;
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
+    }
+
     private void uploadFiles(ArrayList<Uri> uris, String directory) {
         String userId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
         int totalFiles = uris.size();
@@ -282,7 +297,7 @@ public class LandingMain extends AppCompatActivity {
         notificationManager.notify(notificationId, builder.build());
 
         for (Uri uri : uris) {
-            StorageReference fileReference = storageReference.child(userId).child(directory).child(Objects.requireNonNull(uri.getLastPathSegment()));
+            StorageReference fileReference = storageReference.child(userId).child(directory).child(getFileName(uri));
             fileReference.putFile(uri)
                     .addOnSuccessListener(taskSnapshot -> {
                         uploadedFiles.getAndIncrement();
