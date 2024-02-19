@@ -2,7 +2,6 @@ package com.example.storix;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
@@ -19,10 +18,10 @@ import com.google.firebase.storage.FirebaseStorage;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -67,7 +66,7 @@ public class Image extends AppCompatActivity {
 
                     imageAdapter.setOnItemClickListener(image -> {
                         String imgUrl = image.getFileUrl();
-                        new Video.CheckUrlTask() {
+                        new CheckUrlTask() {
                             @Override
                             protected void onPostExecute(Boolean isAccessible) {
                                 if (isAccessible) {
@@ -102,7 +101,7 @@ public class Image extends AppCompatActivity {
 
                                     imgList.add(image);
                                     // Sort the images by name
-                                    imgList.sort((o1, o2) -> o1.getFileName().compareTo(o2.getFileName()));
+                                    imgList.sort(Comparator.comparing(UploadedFiles::getFileName));
                                     imageAdapter.notifyDataSetChanged();
                                 });
                             } else {

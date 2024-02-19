@@ -21,6 +21,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -101,8 +102,10 @@ public class Video extends AppCompatActivity {
                                     video.setFileSize(fileSize);
 
                                     videoList.add(video);
-                                    // Sort the video list names in ascending order
-                                    videoList.sort((video1, video2) -> video1.getFileName().compareToIgnoreCase(video2.getFileName()));
+
+                                    // Sort the video list names
+                                    videoList.sort(Comparator.comparing(UploadedFiles::getFileName));
+
                                     videoAdapter.notifyDataSetChanged();
                                 });
                             } else {

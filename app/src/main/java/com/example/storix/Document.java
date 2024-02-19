@@ -21,6 +21,7 @@ import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -100,7 +101,7 @@ public class Document extends AppCompatActivity {
 
                                     documentList.add(document);
                                     // Sort the document list names in ascending order
-                                    documentList.sort((o1, o2) -> o1.getFileName().compareToIgnoreCase(o2.getFileName()));
+                                    documentList.sort(Comparator.comparing(UploadedFiles::getFileName));
                                     documentAdapter.notifyDataSetChanged();
                                 });
                             } else {
