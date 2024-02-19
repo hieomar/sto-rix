@@ -39,7 +39,6 @@ public class Video extends AppCompatActivity {
         recyclerView = findViewById(R.id.videos_recycler_view);
         viewUploadedVideoContent();
 
-        // TODO: test this code
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.bottom_home) {

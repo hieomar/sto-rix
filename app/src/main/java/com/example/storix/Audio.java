@@ -40,7 +40,6 @@ public class Audio extends AppCompatActivity {
 
         viewUploadedAudioContent();
 
-        // TODO: test this code
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
             if (itemId == R.id.bottom_home) {
