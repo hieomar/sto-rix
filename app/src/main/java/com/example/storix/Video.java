@@ -1,6 +1,5 @@
 package com.example.storix;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -9,21 +8,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.renderscript.Script;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.ListResult;
-import com.google.firebase.storage.StorageMetadata;
-import com.google.firebase.storage.StorageReference;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -33,96 +24,93 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 public class Video extends AppCompatActivity {
 
-     RecyclerView recyclerView;
-    FirebaseStorage firebaseStorage;
+    RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
 
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        bottomNavigationView.setSelectedItemId(R.id.bottom_home);
         recyclerView = findViewById(R.id.videos_recycler_view);
         viewUploadedVideoContent();
+
+        // TODO: test this code
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.bottom_home) {
+                return true;
+            } else if (itemId == R.id.bottom_documents) {
+                startActivity(new Intent(getApplicationContext(), Documents.class));
+                overridePendingTransition(0, 0);
+                return true;
+            } else if (itemId == R.id.bottom_profile) {
+                startActivity(new Intent(getApplicationContext(), UserProfile.class));
+                overridePendingTransition(0, 0);
+                return true;
+            }
+            return false;
+        });
+
     }
 
+    @SuppressLint({"StaticFieldLeak", "NotifyDataSetChanged"})
     protected void viewUploadedVideoContent() {
         String userId = Objects.requireNonNull(FirebaseAuth.getInstance().getCurrentUser()).getUid();
         FirebaseStorage.getInstance().getReference("uploads")
-                .child(userId).child("videos").listAll().addOnSuccessListener(new OnSuccessListener<ListResult>() {
-                    @Override
-                    public void onSuccess(ListResult listResult) {
-                        List<UploadedFiles> videoList = new ArrayList<>();
-                        VideoAdapter videoAdapter = new VideoAdapter(Video.this, videoList);
+                .child(userId).child("videos").listAll().addOnSuccessListener(listResult -> {
+                    List<UploadedFiles> videoList = new ArrayList<>();
+                    VideoAdapter videoAdapter = new VideoAdapter(Video.this, videoList);
 
-                        videoAdapter.setOnItemClickListener(new VideoAdapter.OnItemClickListener() {
-                            @SuppressLint("StaticFieldLeak")
+                    videoAdapter.setOnItemClickListener(video -> {
+                        String videoUrl = video.getFileUrl();
+                        new CheckUrlTask() {
                             @Override
-                            public void onItemClick(UploadedFiles video) {
-                                String videoUrl = video.getFileUrl();
-                                new CheckUrlTask() {
-                                    @Override
-                                    protected void onPostExecute(Boolean isAccessible) {
-                                        if (isAccessible) {
-                                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl));
-                                            intent.setDataAndType(Uri.parse(videoUrl), "video/*");
-                                            startActivity(intent);
-                                        } else {
-                                            Log.d("Video URL", "URL is not accessible: " + videoUrl);
-                                        }
-                                    }
-                                }.execute(videoUrl);
+                            protected void onPostExecute(Boolean isAccessible) {
+                                if (isAccessible) {
+                                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl));
+                                    intent.setDataAndType(Uri.parse(videoUrl), "video/*");
+                                    startActivity(intent);
+                                } else {
+                                    Log.d("Video URL", "URL is not accessible: " + videoUrl);
+                                }
                             }
-                        });
+                        }.execute(videoUrl);
+                    });
 
-                        recyclerView.setAdapter(videoAdapter);
-                        listResult.getItems().forEach(new Consumer<StorageReference>() {
-                            @Override
-                            public void accept(StorageReference storageReference) {
-                                UploadedFiles video = new UploadedFiles();
-                                video.setFileName(storageReference.getName());
+                    recyclerView.setAdapter(videoAdapter);
+                    listResult.getItems().forEach(storageReference -> {
+                        UploadedFiles video = new UploadedFiles();
+                        video.setFileName(storageReference.getName());
 
 
-                                storageReference.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                    @SuppressLint("NotifyDataSetChanged")
-                                    @Override
-                                    public void onComplete(@NonNull Task<Uri> task) {
-                                        if (task.isSuccessful()) {
-                                            storageReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-                                                @Override
-                                                public void onSuccess(StorageMetadata storageMetadata) {
-                                                    String fileSize = String.valueOf(storageMetadata.getSizeBytes());
-                                                    fileSize = getFileSize(Long.parseLong(fileSize));
-                                                    String fileUploadedDate = String.valueOf(storageMetadata.getCreationTimeMillis());
-                                                    fileUploadedDate = convertMillisToDate(Long.parseLong(fileUploadedDate));
+                        storageReference.getDownloadUrl().addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                storageReference.getMetadata().addOnSuccessListener(storageMetadata -> {
+                                    String fileSize = String.valueOf(storageMetadata.getSizeBytes());
+                                    fileSize = getFileSize(Long.parseLong(fileSize));
+                                    String fileUploadedDate = String.valueOf(storageMetadata.getCreationTimeMillis());
+                                    fileUploadedDate = convertMillisToDate(Long.parseLong(fileUploadedDate));
 
-                                                    String videoUrl = task.getResult().toString();
-                                                    video.setFileUrl(videoUrl);
-                                                    video.setFileUploadedDate(fileUploadedDate);
-                                                    video.setFileSize(fileSize);
+                                    String videoUrl = task.getResult().toString();
+                                    video.setFileUrl(videoUrl);
+                                    video.setFileUploadedDate(fileUploadedDate);
+                                    video.setFileSize(fileSize);
 
-                                                    Log.d("date", "date: " + video.getFileUploadedDate());
-                                                    Log.d("size", "size: " + video.getFileSize());
-                                                    videoList.add(video);
-                                                    videoAdapter.notifyDataSetChanged();
-                                                }
-                                            });
-                                        } else {
-                                            Log.d("Video URL", "Failed to get download URL: " + task.getException());
-                                        }
-                                    }
-                                });                            }
-                        });
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(Video.this, "Failed to retrieve videos", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                                    videoList.add(video);
+                                    // Sort the video list names in ascending order
+                                    videoList.sort((video1, video2) -> video1.getFileName().compareToIgnoreCase(video2.getFileName()));
+                                    videoAdapter.notifyDataSetChanged();
+                                });
+                            } else {
+                                Log.d("Video URL", "Failed to get download URL: " + task.getException());
+                            }
+                        });                            });
+                }).addOnFailureListener(e -> Toast.makeText(Video.this, "Failed to retrieve videos", Toast.LENGTH_SHORT).show());
 
     }
 
